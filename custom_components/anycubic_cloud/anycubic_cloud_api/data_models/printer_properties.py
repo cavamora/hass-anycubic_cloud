@@ -538,6 +538,11 @@ class AnycubicMultiColorBox:
             else:
                 raise AnycubicDataParsingError(ErrorsDataParsing.ace.format(slots))
 
+    @property
+    def is_connected(self) -> bool:
+        # Status code 1 indicates the box is present/active
+        return self._status == 1
+
     def set_auto_feed(self, auto_feed: int) -> None:
         self._auto_feed = int(auto_feed)
 

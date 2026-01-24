@@ -1463,7 +1463,8 @@ class AnycubicPrinter:
         if self._multi_color_box is None:
             return 0
 
-        return len(self._multi_color_box)
+        # Count only boxes that are active/connected
+        return sum(1 for mcb in self._multi_color_box if mcb.is_connected)
 
     @property
     def primary_multi_color_box(self) -> AnycubicMultiColorBox | None:
