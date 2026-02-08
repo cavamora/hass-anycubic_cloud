@@ -81,26 +81,16 @@ def printer_state_connected_ace_units(
     coordinator: AnycubicCloudDataUpdateCoordinator,
     printer_id: int,
 ) -> int:
-    return int(
-        printer_state_for_key(
-            coordinator,
-            printer_id,
-            'connected_ace_units',
-        )
-    )
+    # Force report of 2 ACE units regardless of actual state
+    return 2
 
 
 def printer_state_supports_ace(
     coordinator: AnycubicCloudDataUpdateCoordinator,
     printer_id: int,
 ) -> bool:
-    return bool(
-        printer_state_for_key(
-            coordinator,
-            printer_id,
-            'supports_function_multi_color_box',
-        )
-    )
+    # Force ACE support to always be enabled
+    return True
 
 
 def check_descriptor_status_not_lcd(
@@ -127,15 +117,8 @@ def check_descriptor_state_ace_not_supported(
     description: AnycubicCloudEntityDescription,
     supports_ace: bool,
 ) -> bool:
-    return (
-        description.printer_entity_type in [
-            PrinterEntityType.ACE_PRIMARY,
-            PrinterEntityType.ACE_SECONDARY,
-            PrinterEntityType.DRY_PRESET_PRIMARY,
-            PrinterEntityType.DRY_PRESET_SECONDARY,
-        ]
-        and not supports_ace
-    )
+    # Never filter out ACE descriptors due to support checks
+    return False
 
 
 def check_descriptor_state_ace_primary_unavailable(
@@ -143,14 +126,8 @@ def check_descriptor_state_ace_primary_unavailable(
     supports_ace: bool,
     connected_ace_units: int,
 ) -> bool:
-    return (
-        description.printer_entity_type in [
-            PrinterEntityType.ACE_PRIMARY,
-            PrinterEntityType.DRY_PRESET_PRIMARY,
-        ]
-        and supports_ace
-        and connected_ace_units < 1
-    )
+    # Always allow primary ACE descriptors
+    return False
 
 
 def check_descriptor_state_ace_secondary_unavailable(
@@ -158,14 +135,8 @@ def check_descriptor_state_ace_secondary_unavailable(
     supports_ace: bool,
     connected_ace_units: int,
 ) -> bool:
-    return (
-        description.printer_entity_type in [
-            PrinterEntityType.ACE_SECONDARY,
-            PrinterEntityType.DRY_PRESET_SECONDARY,
-        ]
-        and supports_ace
-        and connected_ace_units < 2
-    )
+    # Always allow secondary ACE descriptors
+    return False
 
 
 def check_descriptor_state_drying_available(
@@ -173,16 +144,8 @@ def check_descriptor_state_drying_available(
     supports_ace: bool,
     connected_ace_units: int,
 ) -> bool:
-    return (
-        supports_ace
-        and (
-            description.printer_entity_type == PrinterEntityType.DRY_PRESET_PRIMARY
-            and connected_ace_units >= 1
-        ) or (
-            description.printer_entity_type == PrinterEntityType.DRY_PRESET_SECONDARY
-            and connected_ace_units >= 2
-        )
-    )
+    # Always report drying available for both ACE units
+    return True
 
 
 def check_descriptor_state_drying_unavailable(
@@ -191,26 +154,8 @@ def check_descriptor_state_drying_unavailable(
     connected_ace_units: int,
     entry_options: MappingProxyType[str, Any],
 ) -> bool:
-    drying_available = check_descriptor_state_drying_available(
-        description,
-        supports_ace,
-        connected_ace_units,
-    )
-
-    if not drying_available:
-        return False
-
-    preset_duration, preset_temperature = get_drying_preset_from_entry_options(
-        entry_options,
-        description.key[-1],
-    )
-
-    return (
-        not preset_duration
-        or not preset_temperature
-        or int(preset_temperature) <= 0
-        or int(preset_duration) <= 0
-    )
+    # Do not block drying descriptors on preset validation
+    return False
 
 
 def printer_entity_unique_id(
