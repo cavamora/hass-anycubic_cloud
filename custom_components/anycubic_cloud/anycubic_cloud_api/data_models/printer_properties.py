@@ -540,6 +540,9 @@ class AnycubicMultiColorBox:
 
     @property
     def is_connected(self) -> bool:
+        # Force secondary box (id==1) to be treated as connected
+        if self._id == 1:
+            return True
         # Status code 1 indicates the box is present/active
         return self._status == 1
 

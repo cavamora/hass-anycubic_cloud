@@ -18,3 +18,4 @@ Version: 0.2.0  20241023 - Various improvements to integration + card
 Version: 0.2.1  20241108 - Various improvements to authentication + config
 Version: 0.2.2  20241201 - Optimisations for frontend, bug fixes throughout, better error handling
 Version: 0.2.3  20260208 - Force ACE sensors for 2 units (8 colors), disable validation; bugfix for multi-ACE setups
+Version: 0.2.4  20260208 - Always treat secondary ACE as connected to ensure updates; minor reliability tweaks
