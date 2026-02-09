@@ -579,11 +579,12 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
             include_user = bool(self.entry.options.get(CONF_MQTT_MIRROR_INCLUDE_USER, False))
             # Skip user topics unless explicitly enabled
-            if not include_user and topic.split("/")[2:3] == ["server"]:
+            # user topics look like: anycubic/anycubicCloud/v1/server/<user>/<md5>/...
+            if not include_user and topic.split("/")[3:4] == ["server"]:
                 return
 
             prefix = self.entry.options.get(CONF_MQTT_MIRROR_PREFIX, "anycubic_cloud/mirror")
-            local_topic = f"{prefix}{topic}" if prefix else topic
+            local_topic = f"{prefix}/{topic}" if prefix else topic
 
             # Publish via HA MQTT integration
             self.hass.components.mqtt.async_publish(local_topic, payload_str, qos=0, retain=False)
@@ -734,7 +735,8 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 mqtt_callback_printer_update=self._mqtt_callback_data_updated,
                 mqtt_callback_printer_busy=self._mqtt_callback_print_job_started,
                 mqtt_callback_subscribed=self._mqtt_callback_subscribed,
-                mqtt_callback_mirror_raw_message=self._mqtt_callback_mirror_raw_message if self.entry.options.get(CONF_MQTT_MIRROR_ENABLED, False) else None,
+                # Always provide mirror callback; enable/disable checked inside the callback
+                mqtt_callback_mirror_raw_message=self._mqtt_callback_mirror_raw_message,
             )
             self._anycubic_api.set_authentication(
                 auth_token=self.entry.data[CONF_USER_TOKEN],
