@@ -586,11 +586,16 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             prefix = self.entry.options.get(CONF_MQTT_MIRROR_PREFIX, "anycubic_cloud/mirror")
             local_topic = f"{prefix}/{topic}" if prefix else topic
 
-            # Publish via HA MQTT integration
-            self.hass.components.mqtt.async_publish(local_topic, payload_str, qos=0, retain=False)
+            # Publish via HA MQTT integration (module function expects hass as first arg)
+            mqtt_mod = getattr(self.hass.components, "mqtt", None)
+            if mqtt_mod:
+                mqtt_mod.async_publish(self.hass, local_topic, payload_str, qos=0, retain=False)
+            else:
+                LOGGER.debug("Anycubic MQTT mirror skipped: HA MQTT module not loaded.")
         except Exception:
-            # Avoid raising from mirror path
-            pass
+            # Log mirror errors for diagnostics
+            tb = traceback.format_exc()
+            LOGGER.warning(f"Anycubic MQTT mirror publish error.\n{tb}")
 
     def _anycubic_mqtt_connection_should_start(self) -> bool:
 
