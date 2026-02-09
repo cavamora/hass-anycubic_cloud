@@ -215,7 +215,10 @@
       "mqtt": {
         "title": "MQTT Settings",
         "data": {
-          "mqtt_connect_mode": "MQTT Connection Mode"
+          "mqtt_connect_mode": "MQTT Connection Mode",
+          "mqtt_mirror_enabled": "Mirror Anycubic MQTT to local broker",
+          "mqtt_mirror_prefix": "Mirror topic prefix",
+          "mqtt_mirror_include_user": "Include user-level topics"
         }
       },
       "drying": {

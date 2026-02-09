@@ -34,6 +34,9 @@ from .const import (
     CONF_DEBUG_API_CALLS,
     CONF_DEBUG_DEPRECATED,
     CONF_DEBUG_MQTT_MSG,
+    CONF_MQTT_MIRROR_ENABLED,
+    CONF_MQTT_MIRROR_PREFIX,
+    CONF_MQTT_MIRROR_INCLUDE_USER,
     CONF_MQTT_CONNECT_MODE,
     CONF_PRINTER_ID_LIST,
     CONF_USER_AUTH_MODE,
@@ -563,6 +566,31 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             f"Anycubic coordinator {self.entry.entry_id} MQTT subscribed",
         )
 
+    @callback
+    def _mqtt_callback_mirror_raw_message(
+        self,
+        topic: str,
+        payload_str: str,
+    ) -> None:
+        try:
+            mirror_enabled = bool(self.entry.options.get(CONF_MQTT_MIRROR_ENABLED, False))
+            if not mirror_enabled:
+                return
+
+            include_user = bool(self.entry.options.get(CONF_MQTT_MIRROR_INCLUDE_USER, False))
+            # Skip user topics unless explicitly enabled
+            if not include_user and topic.split("/")[2:3] == ["server"]:
+                return
+
+            prefix = self.entry.options.get(CONF_MQTT_MIRROR_PREFIX, "anycubic_cloud/mirror")
+            local_topic = f"{prefix}{topic}" if prefix else topic
+
+            # Publish via HA MQTT integration
+            self.hass.components.mqtt.async_publish(local_topic, payload_str, qos=0, retain=False)
+        except Exception:
+            # Avoid raising from mirror path
+            pass
+
     def _anycubic_mqtt_connection_should_start(self) -> bool:
 
         if (
@@ -706,6 +734,7 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 mqtt_callback_printer_update=self._mqtt_callback_data_updated,
                 mqtt_callback_printer_busy=self._mqtt_callback_print_job_started,
                 mqtt_callback_subscribed=self._mqtt_callback_subscribed,
+                mqtt_callback_mirror_raw_message=self._mqtt_callback_mirror_raw_message if self.entry.options.get(CONF_MQTT_MIRROR_ENABLED, False) else None,
             )
             self._anycubic_api.set_authentication(
                 auth_token=self.entry.data[CONF_USER_TOKEN],

@@ -29,6 +29,9 @@ from .const import (
     CONF_DRYING_PRESET_DURATION_,
     CONF_DRYING_PRESET_TEMPERATURE_,
     CONF_MQTT_CONNECT_MODE,
+    CONF_MQTT_MIRROR_ENABLED,
+    CONF_MQTT_MIRROR_PREFIX,
+    CONF_MQTT_MIRROR_INCLUDE_USER,
     CONF_PRINTER_ID_LIST,
     CONF_USER_AUTH_MODE,
     CONF_USER_DEVICE_ID,
@@ -535,12 +538,36 @@ class AnycubicCloudOptionsFlowHandler(OptionsFlow):
             AnycubicMQTTConnectMode.Printing_Only,
         )
 
+        default_mirror_enabled = self.entry.options.get(
+            CONF_MQTT_MIRROR_ENABLED,
+            False,
+        )
+
+        default_mirror_prefix = self.entry.options.get(
+            CONF_MQTT_MIRROR_PREFIX,
+            "anycubic_cloud/mirror",
+        )
+
+        default_mirror_include_user = self.entry.options.get(
+            CONF_MQTT_MIRROR_INCLUDE_USER,
+            False,
+        )
+
         return self.async_show_form(
             step_id="mqtt",
             data_schema=vol.Schema({
                 vol.Optional(
                     CONF_MQTT_CONNECT_MODE, default=default_mqtt_connect_mode
-                ): vol.In(MQTT_CONNECT_MODES)
+                ): vol.In(MQTT_CONNECT_MODES),
+                vol.Optional(
+                    CONF_MQTT_MIRROR_ENABLED, default=default_mirror_enabled
+                ): BooleanSelector(),
+                vol.Optional(
+                    CONF_MQTT_MIRROR_PREFIX, default=default_mirror_prefix
+                ): cv.string,
+                vol.Optional(
+                    CONF_MQTT_MIRROR_INCLUDE_USER, default=default_mirror_include_user
+                ): BooleanSelector(),
             }),
             errors={},
         )

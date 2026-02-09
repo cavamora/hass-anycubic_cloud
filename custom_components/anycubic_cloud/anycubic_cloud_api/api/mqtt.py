@@ -50,6 +50,7 @@ class AnycubicMQTTAPI(AnycubicAPIFunctions):
         "_mqtt_callback_printer_update",
         "_mqtt_callback_printer_busy",
         "_mqtt_callback_subscribed",
+        "_mqtt_callback_mirror_raw_message",
     )
 
     def __init__(
@@ -58,6 +59,7 @@ class AnycubicMQTTAPI(AnycubicAPIFunctions):
         mqtt_callback_printer_update: Callable[[], None] | None = None,
         mqtt_callback_printer_busy: Callable[[], None] | None = None,
         mqtt_callback_subscribed: Callable[[], None] | None = None,
+        mqtt_callback_mirror_raw_message: Callable[[str, str], None] | None = None,
         **kwargs: Any,
     ) -> None:
         self._mqtt_client: mqtt_client.Client | None = None
@@ -68,6 +70,7 @@ class AnycubicMQTTAPI(AnycubicAPIFunctions):
         self._mqtt_callback_printer_update: Callable[[], None] | None = mqtt_callback_printer_update
         self._mqtt_callback_printer_busy: Callable[[], None] | None = mqtt_callback_printer_busy
         self._mqtt_callback_subscribed: Callable[[], None] | None = mqtt_callback_subscribed
+        self._mqtt_callback_mirror_raw_message: Callable[[str, str], None] | None = mqtt_callback_mirror_raw_message
         super().__init__(*args, **kwargs)
 
     @property
@@ -265,6 +268,16 @@ class AnycubicMQTTAPI(AnycubicAPIFunctions):
         message: mqtt_client.MQTTMessage,
     ) -> None:
         try:
+            # Mirror raw payload first if enabled
+            if self._mqtt_callback_mirror_raw_message:
+                try:
+                    topic_str = str(message.topic)
+                    payload_str = message.payload.decode("utf-8")
+                    self._mqtt_callback_mirror_raw_message(topic_str, payload_str)
+                except Exception:
+                    # Ignore mirror errors to not disrupt core processing
+                    pass
+
             self._mqtt_message_router(message)
         except Exception as e:
             tb = traceback.format_exc()
