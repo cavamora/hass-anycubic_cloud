@@ -561,6 +561,7 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def _mqtt_callback_subscribed(
         self,
     ) -> None:
+        LOGGER.debug("Anycubic MQTT subscribed; mirror callback active.")
         self.hass.create_task(
             self._async_mqtt_callback_subscribed(),
             f"Anycubic coordinator {self.entry.entry_id} MQTT subscribed",
@@ -667,29 +668,23 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         for printer_id, printer in self._anycubic_printers.items():
             await self.hass.async_add_executor_job(
                 self.anycubic_api.mqtt_unsubscribe_printer_status,
-                printer,
-            )
-        await self.hass.async_add_executor_job(
-            self.anycubic_api.disconnect_mqtt,
-        )
+                try:
+                    # Always mirror all topics into HA MQTT
+                    LOGGER.debug(f"Anycubic MQTT mirror received topic: {topic}")
+                    prefix = self.entry.options.get(CONF_MQTT_MIRROR_PREFIX, "anycubic_cloud/mirror")
+                    local_topic = f"{prefix}/{topic}" if prefix else topic
+                    LOGGER.debug(f"Anycubic MQTT mirror publishing to: {local_topic}")
 
-        await self.anycubic_api.mqtt_wait_for_disconnect()
-
-        if self._mqtt_task is not None and not self._mqtt_task.done():
-            self._mqtt_task.cancel()
-
-        self._mqtt_task = None
-
-    async def stop_anycubic_mqtt_connection_if_started(self) -> None:
-        if self._anycubic_api and self._anycubic_api.mqtt_is_started:
-            await self._stop_anycubic_mqtt_connection()
-
-    async def refresh_anycubic_mqtt_connection(self) -> None:
-        if self._mqtt_last_refresh and int(time.time()) < self._mqtt_last_refresh + MQTT_REFRESH_INTERVAL:
-            return
-
-        if self._mqtt_connect_check_lock.locked():
-            return
+                    # Publish via HA MQTT integration
+                    mqtt_mod = getattr(self.hass.components, "mqtt", None)
+                    if mqtt_mod:
+                        mqtt_mod.async_publish(self.hass, local_topic, payload_str, qos=0, retain=False)
+                    else:
+                        LOGGER.debug("Anycubic MQTT mirror skipped: HA MQTT module not loaded.")
+                except Exception:
+                    # Log mirror errors for diagnostics
+                    tb = traceback.format_exc()
+                    LOGGER.warning(f"Anycubic MQTT mirror publish error.\n{tb}")
 
         if self._anycubic_api and self._anycubic_api.mqtt_is_started:
             async with self._mqtt_refresh_lock:
