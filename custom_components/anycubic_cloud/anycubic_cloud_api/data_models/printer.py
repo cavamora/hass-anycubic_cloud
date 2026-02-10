@@ -939,8 +939,6 @@ class AnycubicPrinter:
             data = payload['data']['multi_color_box']
             for box in data:
                 box_id = int(box['id'])
-                if self.connected_ace_units < box_id + 1:
-                    continue
                 if self._multi_color_box is None:
                     self._multi_color_box = list()
                 if len(self._multi_color_box) <= box_id:
@@ -956,8 +954,6 @@ class AnycubicPrinter:
             data = payload['data']
             box_id = int(data['id'])
             loaded_slot = int(data['loaded_slot'])
-            if self.connected_ace_units < box_id + 1:
-                return
             if not self._multi_color_box or len(self._multi_color_box) <= box_id:
                 # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
                 return
@@ -967,8 +963,6 @@ class AnycubicPrinter:
             data = payload['data']['multi_color_box']
             for box in data:
                 box_id = int(box['id'])
-                if self.connected_ace_units < box_id + 1:
-                    continue
                 if not self._multi_color_box or len(self._multi_color_box) <= box_id:
                     # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
                     continue
@@ -979,8 +973,6 @@ class AnycubicPrinter:
             data = payload['data']['multi_color_box']
             for box in data:
                 box_id = int(box['id'])
-                if self.connected_ace_units < box_id + 1:
-                    continue
 
                 loaded_slot = int(box['loaded_slot'])
                 if not self._multi_color_box or len(self._multi_color_box) <= box_id:
@@ -993,8 +985,6 @@ class AnycubicPrinter:
             data = payload['data']['multi_color_box']
             for box in data:
                 box_id = int(box['id'])
-                if self.connected_ace_units < box_id + 1:
-                    continue
                 if not self._multi_color_box or len(self._multi_color_box) <= box_id:
                     # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
                     continue
