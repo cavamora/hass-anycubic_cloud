@@ -89,6 +89,11 @@ BUTTON_TYPES: list[AnycubicButtonEntityDescription] = list([
         translation_key="request_file_list_udisk",
         printer_entity_type=PrinterEntityType.PRINTER,
     ),
+    AnycubicButtonEntityDescription(
+        key="request_multi_color_box_get_info",
+        translation_key="request_multi_color_box_get_info",
+        printer_entity_type=PrinterEntityType.PRINTER,
+    ),
 ])
 
 GLOBAL_BUTTON_TYPES: list[AnycubicButtonEntityDescription] = list([

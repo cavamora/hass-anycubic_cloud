@@ -978,6 +978,10 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 await self._connect_mqtt_for_action_response()
                 await printer.request_udisk_file_list()
 
+            elif printer and event_key == 'request_multi_color_box_get_info':
+                await self._connect_mqtt_for_action_response()
+                await self.anycubic_api._send_order_multi_color_box_get_info(printer)
+
             elif printer and event_key == 'drying_stop':
                 await self._connect_mqtt_for_action_response()
                 await printer.multi_color_box_drying_stop()
