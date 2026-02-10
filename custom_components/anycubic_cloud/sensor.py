@@ -91,7 +91,7 @@ SECONDARY_MULTI_COLOR_BOX_SENSOR_TYPES: list[AnycubicSensorEntityDescription] = 
     # Alias para compatibilidade com frontend antigo
     AnycubicSensorEntityDescription(
         key="secondary_multi_color_box_spools",
-        translation_key="secondary_ace_spools",
+        translation_key="secondary_multi_color_box_spools",
         printer_entity_type=PrinterEntityType.ACE_SECONDARY,
         not_measured=True,
     ),
