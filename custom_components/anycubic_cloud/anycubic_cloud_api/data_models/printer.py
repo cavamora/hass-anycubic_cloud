@@ -958,8 +958,9 @@ class AnycubicPrinter:
             loaded_slot = int(data['loaded_slot'])
             if self.connected_ace_units < box_id + 1:
                 return
-
-            assert self._multi_color_box
+            if not self._multi_color_box or len(self._multi_color_box) <= box_id:
+                # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
+                return
             self._multi_color_box[box_id].set_slot_loaded(loaded_slot)
             return
         elif action in ['autoUpdateDryStatus', 'setDry'] and state == 'success':
@@ -968,8 +969,9 @@ class AnycubicPrinter:
                 box_id = int(box['id'])
                 if self.connected_ace_units < box_id + 1:
                     continue
-
-                assert self._multi_color_box
+                if not self._multi_color_box or len(self._multi_color_box) <= box_id:
+                    # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
+                    continue
                 self._multi_color_box[box_id].set_current_temperature(box['temp'])
                 self._multi_color_box[box_id].set_drying_status(box['drying_status'])
             return
@@ -981,8 +983,9 @@ class AnycubicPrinter:
                     continue
 
                 loaded_slot = int(box['loaded_slot'])
-
-                assert self._multi_color_box
+                if not self._multi_color_box or len(self._multi_color_box) <= box_id:
+                    # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
+                    continue
                 self._multi_color_box[box_id].set_slot_loaded(loaded_slot)
                 self._multi_color_box[box_id].set_feed_status(box['feed_status'])
             return
@@ -992,8 +995,9 @@ class AnycubicPrinter:
                 box_id = int(box['id'])
                 if self.connected_ace_units < box_id + 1:
                     continue
-
-                assert self._multi_color_box
+                if not self._multi_color_box or len(self._multi_color_box) <= box_id:
+                    # Await setInfo/getInfo to initialise boxes; skip to avoid index errors
+                    continue
                 self._multi_color_box[box_id].set_auto_feed(box['auto_feed'])
             return
         else:
@@ -1481,16 +1485,14 @@ class AnycubicPrinter:
 
     @property
     def primary_multi_color_box(self) -> AnycubicMultiColorBox | None:
-        if self.connected_ace_units > 0:
-            assert self._multi_color_box
+        if self.connected_ace_units > 0 and self._multi_color_box and len(self._multi_color_box) > 0:
             return self._multi_color_box[0]
 
         return None
 
     @property
     def secondary_multi_color_box(self) -> AnycubicMultiColorBox | None:
-        if self.connected_ace_units > 1:
-            assert self._multi_color_box
+        if self.connected_ace_units > 1 and self._multi_color_box and len(self._multi_color_box) > 1:
             return self._multi_color_box[1]
 
         return None
