@@ -244,7 +244,14 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "file_list_udisk": state_string_loaded(file_list_udisk),
             "file_list_cloud": state_string_loaded(file_list_cloud),
             "supports_function_multi_color_box": printer.supports_function_multi_color_box,
-            "connected_ace_units": printer.connected_ace_units,
+            # Fallback: se o REST só retornar uma caixa em `multi_color_box`,
+            # mas `multi_color_box_version` listar ambas (primária/secundária),
+            # use o comprimento da lista de versões como indicativo de quantidade disponível
+            # para fins de registro de entidades (sem validar conexão ativa).
+            "connected_ace_units": max(
+                printer.connected_ace_units,
+                len(printer.multi_color_box_fw_version) if printer.multi_color_box_fw_version else 0,
+            ),
             "multi_color_box_fw_version": printer.primary_multi_color_box_fw_firmware_version,
             "ace_spools": state_string_active(primary_ace_spool_info),
             "multi_color_box_runout_refill": printer.primary_multi_color_box_auto_feed,
