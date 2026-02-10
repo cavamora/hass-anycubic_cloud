@@ -8910,7 +8910,7 @@
     }
     willUpdate(t) {
       var e, i, r, n;
-      if (super.willUpdate(t), t.has("language") && (this._buttonPrintSettings = sn("card.buttons.print_settings", this.language)), t.has("monitoredStats") && (this.monitoredStats = (r = this.monitoredStats, n = eo, void 0 === r ? n : r)), t.has("selectedPrinterID") && (this.printerEntities = ei(this.hass, this.selectedPrinterID), this.printerEntityIdPart = si(this.printerEntities)), t.has("hass") || t.has("alwaysShow") || t.has("hiddenOverride") || t.has("selectedPrinterID")) {
+      if (super.willUpdate(t), t.has("language") && (this._buttonPrintSettings = sn("card.buttons.print_settings", this.language)), t.has("monitoredStats") && (this.monitoredStats = (r = this.monitoredStats, n = eo, void 0 === r ? n : r)), t.has("selectedPrinterID") && (this.printerEntities = ei(this.hass, this.selectedPrinterID), this.printerEntityIdPart = si(this.printerEntities)), t.has("hass") && this.selectedPrinterID && (this.printerEntities = ei(this.hass, this.selectedPrinterID), this.printerEntityIdPart = si(this.printerEntities)), t.has("hass") || t.has("alwaysShow") || t.has("hiddenOverride") || t.has("selectedPrinterID")) {
         this.progressPercent = this._percentComplete(), this.hasColorbox = "active" === li(this.hass, this.printerEntities, this.printerEntityIdPart, "ace_spools", "inactive").state, this.hasSecondaryColorbox = "active" === li(this.hass, this.printerEntities, this.printerEntityIdPart, "secondary_multi_color_box_spools", "inactive").state, this.cameraEntityId && (this.cameraEntityState = Qe(this.hass, {
           entity_id: this.cameraEntityId
         })), this.lightIsOn = ti(this.hass, {

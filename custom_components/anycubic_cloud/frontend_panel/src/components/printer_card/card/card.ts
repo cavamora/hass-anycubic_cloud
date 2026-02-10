@@ -168,13 +168,14 @@ export class AnycubicPrintercardCard extends LitElement {
       ) as PrinterCardStatType[];
     }
 
-    if (changedProperties.has("selectedPrinterID")) {
-      this.printerEntities = getPrinterEntities(
-        this.hass,
-        this.selectedPrinterID,
-      );
-
-      this.printerEntityIdPart = getPrinterEntityIdPart(this.printerEntities);
+    if (changedProperties.has("selectedPrinterID") || changedProperties.has("hass")) {
+      if (this.selectedPrinterID) {
+        this.printerEntities = getPrinterEntities(
+          this.hass,
+          this.selectedPrinterID,
+        );
+        this.printerEntityIdPart = getPrinterEntityIdPart(this.printerEntities);
+      }
     }
 
     if (
