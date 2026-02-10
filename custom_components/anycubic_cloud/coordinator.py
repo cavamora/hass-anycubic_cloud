@@ -544,6 +544,12 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             try:
                 if printer.printer_online:
                     await printer.query_printer_options()
+                    # Solicitar informações completas da Multi Color Box para popular ambas as ACEs
+                    try:
+                        await self.anycubic_api._send_order_multi_color_box_get_info(printer)
+                    except Exception as e:
+                        tb = traceback.format_exc()
+                        LOGGER.debug(f"Anycubic MQTT getInfo error: {e}\n{tb}")
             except Exception as error:
                 tb = traceback.format_exc()
                 LOGGER.warning(f"Anycubic MQTT on subscribe error: {error}\n{tb}")

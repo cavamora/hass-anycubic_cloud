@@ -941,7 +941,14 @@ class AnycubicPrinter:
                 box_id = int(box['id'])
                 if self.connected_ace_units < box_id + 1:
                     continue
-                assert self._multi_color_box
+                if self._multi_color_box is None:
+                    self._multi_color_box = list()
+                if len(self._multi_color_box) <= box_id:
+                    ace_obj = AnycubicMultiColorBox.from_json(box)
+                    if ace_obj:
+                        self._multi_color_box.append(ace_obj)
+                    else:
+                        continue
                 self._multi_color_box[box_id].update_slots_with_mqtt_data(box['slots'])
             return
 
@@ -1460,11 +1467,17 @@ class AnycubicPrinter:
 
     @property
     def connected_ace_units(self) -> int:
-        if self._multi_color_box is None:
-            return 0
+        # Prefer actual connected boxes if available, otherwise fall back
+        # to the number of firmware entries reported for ACE units.
+        count_connected = 0
+        if self._multi_color_box is not None:
+            count_connected = sum(1 for mcb in self._multi_color_box if mcb.is_connected)
 
-        # Count only boxes that are active/connected
-        return sum(1 for mcb in self._multi_color_box if mcb.is_connected)
+        fw_len = 0
+        if self._multi_color_box_fw_version is not None:
+            fw_len = len(self._multi_color_box_fw_version)
+
+        return max(count_connected, fw_len)
 
     @property
     def primary_multi_color_box(self) -> AnycubicMultiColorBox | None:
