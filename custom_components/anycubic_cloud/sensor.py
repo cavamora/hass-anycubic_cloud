@@ -88,6 +88,13 @@ SECONDARY_MULTI_COLOR_BOX_SENSOR_TYPES: list[AnycubicSensorEntityDescription] = 
         printer_entity_type=PrinterEntityType.ACE_SECONDARY,
         not_measured=True,
     ),
+    # Alias para compatibilidade com frontend antigo
+    AnycubicSensorEntityDescription(
+        key="secondary_multi_color_box_spools",
+        translation_key="secondary_ace_spools",
+        printer_entity_type=PrinterEntityType.ACE_SECONDARY,
+        not_measured=True,
+    ),
     AnycubicSensorEntityDescription(
         key="secondary_dry_status_target_temperature",
         translation_key="secondary_dry_status_target_temperature",

@@ -258,6 +258,8 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "ace_current_temperature": printer.primary_multi_color_box_current_temperature,
             "secondary_multi_color_box_fw_version": printer.secondary_multi_color_box_fw_firmware_version,
             "secondary_ace_spools": state_string_active(secondary_ace_spool_info),
+            # Alias para compatibilidade com frontend antigo
+            "secondary_multi_color_box_spools": state_string_active(secondary_ace_spool_info),
             "secondary_multi_color_box_runout_refill": printer.secondary_multi_color_box_auto_feed,
             "secondary_ace_current_temperature": printer.secondary_multi_color_box_current_temperature,
             "dry_status_is_drying": printer.primary_drying_status_is_drying,
@@ -306,6 +308,10 @@ class AnycubicCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 "spool_info": primary_ace_spool_info
             },
             "secondary_ace_spools": {
+                "spool_info": secondary_ace_spool_info
+            },
+            # Alias para compatibilidade com frontend antigo
+            "secondary_multi_color_box_spools": {
                 "spool_info": secondary_ace_spool_info
             },
             "file_list_local": {
