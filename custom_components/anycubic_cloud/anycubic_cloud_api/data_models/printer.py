@@ -545,7 +545,41 @@ class AnycubicPrinter:
         self._set_tools(data.get('tools'))
         self._update_multi_color_box_fw_version_from_json(data.get('multi_color_box_version'))
         self._set_external_shelves(data.get('external_shelves'))
-        self._set_multi_color_box(data.get('multi_color_box'))
+        # Preserve existing ACE boxes; merge or append incoming without dropping secondary
+        self._merge_multi_color_box_from_json(data.get('multi_color_box'))
+
+    def _merge_multi_color_box_from_json(
+        self,
+        multi_color_box: list[dict[str, Any]] | dict[str, Any] | None,
+    ) -> None:
+        try:
+            if multi_color_box is None:
+                return
+
+            # Normalize to list
+            mcb_list: list[dict[str, Any]] = (
+                multi_color_box if isinstance(multi_color_box, list) else [multi_color_box]
+            )
+
+            if self._multi_color_box is None:
+                # Initial set if nothing exists
+                self._set_multi_color_box(multi_color_box)
+                return
+
+            for box in mcb_list:
+                box_id = int(box.get('id', 0))
+                ace_obj = AnycubicMultiColorBox.from_json(box)
+                if not ace_obj:
+                    continue
+                if len(self._multi_color_box) <= box_id:
+                    self._multi_color_box.append(ace_obj)
+                else:
+                    # Replace existing entry with latest data from API
+                    self._multi_color_box[box_id] = ace_obj
+
+        except Exception as e:
+            # Fall back to standard setter on unexpected format
+            self._set_multi_color_box(multi_color_box)
 
     def _check_latest_project_id_valid(
         self,
